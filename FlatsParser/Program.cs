@@ -13,7 +13,7 @@ namespace FlatsParser
         {
             var client = new WebClient { Encoding = Encoding.UTF8 };
             var flats = new List<Flat>();
-            for (var id = 1499; id < 1739; id++)
+            for (var id = 1449; id < 1739; id++)
             {
                 var url = $"http://www.xn--80adrpkbapik.xn--p1ai/flats/{id}";
                 var downloadString = client.DownloadString(url);
