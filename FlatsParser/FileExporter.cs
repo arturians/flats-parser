@@ -6,9 +6,9 @@ using System.Text;
 
 namespace FlatsParser
 {
-    internal class FileExporter : IResultExporter
+	internal class FileExporter : ResultExporter
     {
-        public void Export(IEnumerable<Flat> flats)
+        public override void Export(IEnumerable<Flat> flats)
         {
             using (var fs = File.Create($"{DateTime.Now:yyyy_MM_dd}.txt"))
             {
@@ -33,9 +33,6 @@ namespace FlatsParser
             }
         }
 
-        private static string FormatDouble(double d)
-        {
-            return d.ToString("F", CultureInfo.GetCultureInfo("ru-RU"));
-        }
+        
     }
 }

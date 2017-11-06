@@ -1,4 +1,6 @@
+using System;
 using System.Data;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace FlatsParser
@@ -43,6 +45,18 @@ namespace FlatsParser
 
         private static void ParseAreaSection(string downloadString, Flat flat)
         {
+	        var actions = new Action<double>[]
+	        {
+		        d => flat.RoomsCount = (int) d,
+		        d => flat.TotalArea = d,
+		        d => flat.LivingArea = d,
+		        d =>
+		        {
+			        if ((int) d != flat.Floor) throw new DataException("Floor mismatch");
+		        },
+		        d => flat.KitchenArea = d
+	        };
+
             var regex = new Regex(@"\<span class=\'level\'\>(?'number'([0-9]*(\.|\,)[0-9]*)|([0-9]*))(?!кв.)",
                 RegexOptions.Multiline);
             var numberMatch = regex.Matches(downloadString);
@@ -55,26 +69,8 @@ namespace FlatsParser
                 if (string.IsNullOrEmpty(str))
                     continue;
                 str = str.Replace(',', '.');
-                var d = double.Parse(str);
-                switch (i)
-                {
-                    case 0:
-                        flat.RoomsCount = (int) d;
-                        break;
-                    case 1:
-                        flat.TotalArea = d;
-                        break;
-                    case 2:
-                        flat.LivingArea = d;
-                        break;
-                    case 3:
-                        if ((int) d != flat.Floor)
-                            throw new DataException("Floor mismatch");
-                        break;
-                    case 4:
-                        flat.KitchenArea = d;
-                        break;
-                }
+	            double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out var d);
+	            actions[i].Invoke(d);
             }
         }
 

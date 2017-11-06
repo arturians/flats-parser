@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace FlatsParser
 {
@@ -12,8 +13,8 @@ namespace FlatsParser
         public double LivingArea;
         public double? KitchenArea;
         public int Price;
-        public double AreaRatio => LivingArea / TotalArea;
-        public double PricePerMetre => Price / TotalArea;
+        public double AreaRatio => Math.Round(LivingArea / TotalArea, 2);
+        public double PricePerMetre => Math.Round(Price / TotalArea, 2);
         public int Id;
         public string Url;
         public State CurrentState;

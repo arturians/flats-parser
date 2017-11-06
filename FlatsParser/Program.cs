@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FlatsParser
 {
-    internal class Program
+    internal static class Program
     {
         private const int FirstId = 1449;
         private const int LastId = 1739;
@@ -32,8 +32,11 @@ namespace FlatsParser
 
             Console.WriteLine("Sorting...");
             flats.Sort((flat, flat1) => flat1.Number - flat.Number);
-            Console.WriteLine("Sorted");
+            Console.WriteLine($"Done{Environment.NewLine}Exporting to file...");
             new FileExporter().Export(flats);
+	        Console.WriteLine($"Done{Environment.NewLine}Exporting to Google Sheets");
+			new GoogleSheetExporter().Export(flats);
+	        Console.WriteLine("Done");
         }
     }
 }
