@@ -25,6 +25,6 @@ namespace FlatsParser
     {
         Free,
         Reserved,
-        Saled
+        Sold
     }
 }

@@ -78,7 +78,7 @@ namespace FlatsParser
         {
             if (downloadString.Contains("Квартира продана"))
             {
-                flat.CurrentState = State.Saled;
+                flat.CurrentState = State.Sold;
                 return;
             }
             if (downloadString.Contains("Забронировано"))
