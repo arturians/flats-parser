@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace FlatsParser
 {
@@ -14,10 +15,18 @@ namespace FlatsParser
             flatsLocalStorageProvider.Store(flats);
 
             var distincts = new FlatsComparator(previousSavedFlats, flats).GetDistincts();
-            if (!distincts.Any())
-                return;
-            new EmailNotifier(distincts, configuration).Notify();
-            new GoogleSheetExporter().Export(flats);
+            if (distincts.Any())
+            {
+                new EmailNotifier(distincts, configuration).Notify();
+                Console.WriteLine("Notified to email");
+                new GoogleSheetExporter().Export(flats);
+                Console.WriteLine("Stored to google sheets");
+            }
+            else
+            {
+                Console.WriteLine("No changes!");
+            }
+
         }
     }
 }

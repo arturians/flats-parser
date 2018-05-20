@@ -19,7 +19,8 @@ namespace FlatsParser
                     continue;
                 ThrowIfArgumentsSizeIncorrect(arguments, i);
                 var pathToConfiguration = arguments[i + 1];
-                var configuration = JsonConvert.DeserializeObject<ProgramConfiguration>(pathToConfiguration);
+                var text = File.ReadAllText(pathToConfiguration);
+                var configuration = JsonConvert.DeserializeObject<ProgramConfiguration>(text);
                 return configuration;
             }
 
