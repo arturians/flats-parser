@@ -18,13 +18,35 @@ namespace FlatsParser
         public int Id;
         public string Url;
         public State CurrentState;
+
+        public bool IsSame(Flat other)
+        {
+            const double accuracy = 0.01;
+            return Section == other.Section
+                   && Floor == other.Floor
+                   && Number == other.Number
+                   && RoomsCount == other.RoomsCount
+                   && AlmostEqual(TotalArea, other.TotalArea, accuracy)
+                   && AlmostEqual(LivingArea, other.LivingArea, accuracy)
+                   && Id == other.Id;
+        }
+
+        private static bool AlmostEqual(double a, double b, double accuracy)
+        {
+            return Math.Abs(a - b) < accuracy;
+        }
+
+        public override string ToString()
+        {
+            return $"Number {Number}; rooms {RoomsCount}; floor {Floor}; section {Section}; Id {Id}";
+        }
     }
 
     [DefaultValue(Free)]
     public enum State
     {
-        Free,
-        Reserved,
-        Sold
+        Free = 1, //note: for right serialization
+        Reserved = 2,
+        Sold = 3
     }
 }
