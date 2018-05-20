@@ -14,10 +14,10 @@ namespace FlatsParser
             flatsLocalStorageProvider.Store(flats);
 
             var distincts = new FlatsComparator(previousSavedFlats, flats).GetDistincts();
-            if (distincts.Any())
-            {
-                new EmailNotifier(distincts, configuration).Notify();
-            }
+            if (!distincts.Any())
+                return;
+            new EmailNotifier(distincts, configuration).Notify();
+            new GoogleSheetExporter().Export(flats);
         }
     }
 }
