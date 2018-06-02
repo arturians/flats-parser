@@ -44,9 +44,12 @@ namespace FlatsParser
             {
                 var old = distinct.Item1;
                 var latest = distinct.Item2;
-                stringBuilder.Append($"Квартира {old.Number:000} этаж {old.Floor:00} секция {old.Section} url: {latest.Url}");
+                stringBuilder.Append($"{Environment.NewLine}Квартира {old.Number:000} этаж {old.Floor:00} секция {old.Section} url: {latest.Url}");
                 if (old.Price != latest.Price)
-                    stringBuilder.Append($"{Environment.NewLine}Цена: {old.Price} -> {latest.Price}");
+                {
+                    var priceDistinct = (latest.Price - old.Price).ToString("+0;-#");
+                    stringBuilder.Append($"{Environment.NewLine}Цена: {old.Price} -> {latest.Price} = {priceDistinct}");
+                }
                 if (old.CurrentState != latest.CurrentState)
                     stringBuilder.Append($"{Environment.NewLine}Статус: {old.CurrentState} -> {latest.CurrentState}");
                 stringBuilder.Append(Environment.NewLine);
