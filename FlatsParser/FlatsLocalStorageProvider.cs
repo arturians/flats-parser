@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -32,7 +33,7 @@ namespace FlatsParser
         public void Store(Flat[] flats)
         {
             var serializeObject = JsonConvert.SerializeObject(flats, Formatting.Indented);
-            var currentFileName = $"{DateTime.UtcNow:yyyy_MM_dd_hh_mm}.txt";
+            var currentFileName = $"{DateTime.UtcNow:yyyy_MM_dd_HH_mm}_utc.txt";
             var fullName = Path.Combine(_flatsLocalStoragePath, currentFileName);
             File.WriteAllText(fullName, serializeObject);
         }

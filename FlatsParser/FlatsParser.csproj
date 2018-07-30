@@ -82,7 +82,6 @@
     <Compile Include="FlatsLocalStorageProvider.cs" />
     <Compile Include="ProgramConfiguration.cs" />
     <Compile Include="ProgramConfigurator.cs" />
-    <Compile Include="FileExporter.cs" />
     <Compile Include="Flat.cs" />
     <Compile Include="FlatsInfoProvider.cs" />
     <Compile Include="GoogleSheetExporter.cs" />

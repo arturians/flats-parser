@@ -78,7 +78,7 @@ namespace FlatsParser
 			return new NewSheetInfo
 			{
 				Id = (int)(DateTime.Now - new DateTime(2017, 1, 1)).TotalSeconds,
-				Name = DateTime.Now.ToString("yyyy-MM-dd_HH:mm")
+				Name = DateTime.Now.ToString("u")
 			};
 		}
 

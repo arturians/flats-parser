@@ -28,7 +28,7 @@ namespace FlatsParser
             {
                 try
                 {
-                    smtpClient.Send(_programConfiguration.EmailAuthor, _programConfiguration.EmailRecipients, $"Изменения от {DateTime.UtcNow:dd MM yyyy hh:mm}", body);
+                    smtpClient.Send(_programConfiguration.EmailAuthor, _programConfiguration.EmailRecipients, $"Изменения от {DateTime.UtcNow:u}", body);
                 }
                 catch (Exception e)
                 {
@@ -44,7 +44,7 @@ namespace FlatsParser
             {
                 var old = distinct.Item1;
                 var latest = distinct.Item2;
-                stringBuilder.Append($"{Environment.NewLine}Квартира {old.Number:000} этаж {old.Floor:00} секция {old.Section} url: {latest.Url}");
+                stringBuilder.Append($"{Environment.NewLine}{old.RoomsCount}к. квартира {old.Number:000}({old.Floor:00} этаж, {old.Section} секция, url: {latest.Url} )");
                 if (old.Price != latest.Price)
                 {
                     var priceDistinct = (latest.Price - old.Price).ToString("+0;-#");
