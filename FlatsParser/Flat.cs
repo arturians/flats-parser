@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace FlatsParser
 {
@@ -9,31 +11,42 @@ namespace FlatsParser
         public int Floor;
         public int Number;
         public int RoomsCount;
-        public double TotalArea;
-        public double LivingArea;
+        public decimal TotalArea;
+        public decimal LivingArea;
+        [Obsolete]
         public double? KitchenArea;
-        public int Price;
-        public double AreaRatio => Math.Round(LivingArea / TotalArea, 2);
-        public double PricePerMetre => Math.Round(Price / TotalArea, 2);
+        public decimal Price;
+        public decimal AreaRatio => SaveDevide(LivingArea, TotalArea);
+        public decimal PricePerMetre => SaveDevide(Price, TotalArea);
+        public decimal FlatHight;
         public int Id;
         public string Url;
+        [JsonConverter(typeof(StringEnumConverter))]
         public State CurrentState;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Decoration Decoration;
+        public bool IsClassicKitchen;
+        public string BuildName;
+        public int Bathroom;
+        public int Balcony;
+        public string Deadline;
 
         public bool IsSame(Flat other)
         {
-            const double accuracy = 0.01;
             return Section == other.Section
                    && Floor == other.Floor
                    && Number == other.Number
                    && RoomsCount == other.RoomsCount
-                   && AlmostEqual(TotalArea, other.TotalArea, accuracy)
-                   && AlmostEqual(LivingArea, other.LivingArea, accuracy)
+                   && TotalArea == other.TotalArea
+                   && LivingArea == other.LivingArea
                    && Id == other.Id;
         }
 
-        private static bool AlmostEqual(double a, double b, double accuracy)
+        private static decimal SaveDevide(decimal devidend, decimal devisor)
         {
-            return Math.Abs(a - b) < accuracy;
+            return devisor == 0 
+                ? default
+                : decimal.Divide(devidend, devisor);
         }
 
         public override string ToString()
@@ -49,4 +62,17 @@ namespace FlatsParser
         Reserved = 2,
         Sold = 3
     }
+
+    [DefaultValue(Unknown)]
+    public enum Decoration
+    {
+        Unknown = 1,
+        None = 2,
+        Full = 3
+    }
+
+    //public enum KitchenType
+    //{
+
+    //}
 }
