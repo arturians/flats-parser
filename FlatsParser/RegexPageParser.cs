@@ -33,7 +33,7 @@ namespace FlatsParser
         {
             var mainInfoRegex =
                 new Regex(
-                    @"Первый квартал — Секция № (?'Section'\d{1}) — (?'Floor'\d{1,2}) этаж — Квартира № (?'Number'\d{1,3}) — Острова",
+                    @"Новый город, (?'Quarter'\d) квартал — Секция № (?'Section'\d{1}) — (?'Floor'\d{1,2}) этаж — Квартира № (?'Number'\d{1,3}) — Острова",
                     RegexOptions.IgnoreCase);
             var match = mainInfoRegex.Match(downloadString);
             if (!match.Success)
