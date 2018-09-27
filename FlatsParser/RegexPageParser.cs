@@ -48,13 +48,12 @@ namespace FlatsParser
 	        var actions = new Action<double>[]
 	        {
 		        d => flat.RoomsCount = (int) d,
-		        d => flat.TotalArea = d,
-		        d => flat.LivingArea = d,
+		        d => flat.TotalArea = (decimal) d,
+		        d => flat.LivingArea = (decimal) d,
 		        d =>
 		        {
 			        if ((int) d != flat.Floor) throw new DataException("Floor mismatch");
-		        },
-		        d => flat.KitchenArea = d
+		        }
 	        };
 
             var regex = new Regex(@"\<span class=\'level\'\>(?'number'([0-9]*(\.|\,)[0-9]*)|([0-9]*))(?!кв.)",

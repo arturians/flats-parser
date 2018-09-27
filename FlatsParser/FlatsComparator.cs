@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -7,31 +6,37 @@ namespace FlatsParser
 {
     public class FlatsComparator
     {
-        private readonly Flat[] _oldFlats;
-        private readonly Flat[] _latestFlats;
+        private readonly Flat[] oldFlats;
+        private readonly Flat[] latestFlats;
 
         public FlatsComparator(Flat[] oldFlats, Flat[] latestFlats)
         {
-            _oldFlats = oldFlats;
-            _latestFlats = latestFlats;
+            this.oldFlats = oldFlats;
+            this.latestFlats = latestFlats;
         }
 
-        public List<Tuple<Flat, Flat>> GetDistincts()
-        {
-            var distincts = new List<Tuple<Flat, Flat>>();
-            if (_oldFlats.Length != _latestFlats.Length)
-                throw new DataException($"Current array contains {_latestFlats.Count()} flats, but previous {_oldFlats.Count()}");
-            for (var i = 0; i < _oldFlats.Length; ++i)
-            {
-                var oldFlatInfo = _oldFlats[i];
-                var latestFlatInfo = _latestFlats[i];
-                if (!oldFlatInfo.IsSame(latestFlatInfo))
-                    throw new DataException($"Old flat {oldFlatInfo} is not same as {latestFlatInfo}");
-                if (oldFlatInfo.Price != latestFlatInfo.Price || oldFlatInfo.CurrentState != latestFlatInfo.CurrentState)
-                    distincts.Add(new Tuple<Flat, Flat>(oldFlatInfo, latestFlatInfo));
-            }
+		public List<FlatsDistinct> GetDistincts()
+		{
+			var distincts = new List<FlatsDistinct>();
+			var oldFlatsDict = oldFlats.ToDictionary(flat => flat.Id, flat => flat);
+			var latestFlatsDict = latestFlats.ToDictionary(flat => flat.Id, flat => flat);
+			foreach (var flatWithId in latestFlatsDict)
+			{
+				if (!oldFlatsDict.TryGetValue(flatWithId.Key, out var oldFlatState))
+				{
+					distincts.Add(new FlatsDistinct(flatWithId.Value));
+					continue;
+				}
+				if (!oldFlatState.IsSame(flatWithId.Value))
+					throw new DataException($"Old flat {oldFlatState} is not same as {flatWithId.Value}");
+				if (oldFlatState.Price != flatWithId.Value.Price || oldFlatState.CurrentState != flatWithId.Value.CurrentState)
+					distincts.Add(new FlatsDistinct(flatWithId.Value, oldFlatState));
+			}
 
-            return distincts;
-        }
+			var lostIds = oldFlatsDict.Keys.Except(latestFlatsDict.Keys).ToArray();
+			distincts.AddRange(lostIds.Select(lostId => new FlatsDistinct(previousState: oldFlatsDict[lostId])));
+
+			return distincts;
+		}
     }
 }

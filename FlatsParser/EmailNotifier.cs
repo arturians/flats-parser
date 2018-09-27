@@ -3,58 +3,100 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using log4net;
 
 namespace FlatsParser
 {
-    public class EmailNotifier
-    {
-        private readonly List<Tuple<Flat, Flat>> _distincts;
-        private readonly ProgramConfiguration _programConfiguration;
+	public class EmailNotifier
+	{
+		private readonly List<FlatsDistinct> distincts;
+		private readonly ProgramConfiguration programConfiguration;
+		private readonly ILog logger;
 
-        public EmailNotifier(List<Tuple<Flat, Flat>> distincts, ProgramConfiguration programConfiguration)
-        {
-            _distincts = distincts;
-            _programConfiguration = programConfiguration;
-        }
+		public EmailNotifier(List<FlatsDistinct> distincts, ProgramConfiguration programConfiguration)
+		{
+			this.distincts = distincts;
+			this.programConfiguration = programConfiguration;
+			logger = LogManager.GetLogger(GetType());
+		}
 
-        public void Notify()
-        {
-            var body = CreateBody();
-            using (var smtpClient = new SmtpClient(_programConfiguration.SmtpHost, _programConfiguration.SmtpPort)
-            {
-                Credentials = new NetworkCredential(_programConfiguration.EmailAuthor, _programConfiguration.EmailPassword),
-                EnableSsl = _programConfiguration.EnableSsl
-            })
-            {
-                try
-                {
-                    smtpClient.Send(_programConfiguration.EmailAuthor, _programConfiguration.EmailRecipients, $"Изменения от {DateTime.UtcNow:u}", body);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
-        }
+		public bool Notify()
+		{
+			var body = CreateBody();
+			var buildNames = GetBuildNames();
 
-        private string CreateBody()
-        {
-            var stringBuilder = new StringBuilder();
-            foreach (var distinct in _distincts)
-            {
-                var old = distinct.Item1;
-                var latest = distinct.Item2;
-                stringBuilder.Append($"{Environment.NewLine}{old.RoomsCount}к. квартира {old.Number:000}({old.Floor:00} этаж, {old.Section} секция, url: {latest.Url} )");
-                if (old.Price != latest.Price)
-                {
-                    var priceDistinct = (latest.Price - old.Price).ToString("+0;-#");
-                    stringBuilder.Append($"{Environment.NewLine}Цена: {old.Price} -> {latest.Price} = {priceDistinct}");
-                }
-                if (old.CurrentState != latest.CurrentState)
-                    stringBuilder.Append($"{Environment.NewLine}Статус: {old.CurrentState} -> {latest.CurrentState}");
-                stringBuilder.Append(Environment.NewLine);
-            }
-            return stringBuilder.ToString();
-        }
-    }
+			using (var smtpClient = new SmtpClient(programConfiguration.SmtpHost, programConfiguration.SmtpPort)
+			{
+				Credentials = new NetworkCredential(programConfiguration.EmailAuthor, programConfiguration.EmailPassword),
+				EnableSsl = programConfiguration.EnableSsl
+			})
+			{
+				try
+				{
+					smtpClient.Send(programConfiguration.EmailAuthor, programConfiguration.EmailRecipients, $"Изменения {buildNames} от {DateTime.UtcNow:u}", body);
+					return true;
+				}
+				catch (Exception e)
+				{
+					logger.Error("Some error ocurred when send distincts", e);
+				}
+			}
+
+			return false;
+		}
+
+		private string GetBuildNames()
+		{
+			var hashSet = new HashSet<string>();
+			foreach (var flatsDistinct in distincts)
+			{
+				if (flatsDistinct.LatestState != null)
+					hashSet.Add(flatsDistinct.LatestState.BuildName);
+				if (flatsDistinct.PreviousState != null)
+					hashSet.Add(flatsDistinct.PreviousState.BuildName);
+			}
+
+			return string.Join(",", hashSet);
+		}
+
+		private string CreateBody()
+		{
+			var stringBuilder = new StringBuilder();
+			foreach (var distinct in distincts)
+			{
+				var old = distinct.PreviousState;
+				var latest = distinct.LatestState;
+
+				var flat = latest ?? old;
+
+				if (flat == null)
+				{
+					logger.Error("Found NULL flat, skip it to send");
+					continue;
+				}
+
+				stringBuilder.AppendLine($"{flat.RoomsCount}к. квартира {flat.Number:000}({flat.Floor:00} этаж, {flat.Section} секция, url: {flat.Url} )");
+				if (old == null)
+				{
+					stringBuilder.AppendLine($"Новая информация о квартире с id {latest.Id}");
+				}
+				else if (latest == null)
+				{
+					stringBuilder.AppendLine($"Исчезла информация о квартире с предыдущим Id {old.Id}");
+				}
+				else
+				{
+					if (old.Price != latest.Price)
+					{
+						var priceDistinct = (latest.Price - old.Price).ToString("+0;-#");
+						stringBuilder.AppendLine($"Цена: {old.Price} -> {latest.Price} = {priceDistinct}");
+					}
+					if (old.CurrentState != latest.CurrentState)
+						stringBuilder.AppendLine($"Статус: {old.CurrentState} -> {latest.CurrentState}");
+				}
+				stringBuilder.AppendLine(Environment.NewLine);
+			}
+			return stringBuilder.ToString();
+		}
+	}
 }

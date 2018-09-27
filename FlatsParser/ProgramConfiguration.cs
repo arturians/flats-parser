@@ -9,5 +9,7 @@
         public int SmtpPort { get; set; }
         public bool EnableSsl { get; set; }
         public string EmailRecipients { get; set; }
+		public string GoogleSpreadsheetId { get; set; }
+		public string AllowedBuildName { get; set; }
     }
 }

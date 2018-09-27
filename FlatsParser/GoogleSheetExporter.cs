@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,16 +8,24 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
+using log4net;
 
 namespace FlatsParser
 {
     internal class GoogleSheetExporter : ResultExporter
     {
-        private static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
-        private const string ApplicationName = "Flats Parser";
-        private const string SpreadsheetId = "1J1JAErjEF9Z6-qodsUHz4MST84EoVkF3BgaAotR6SHk";
+        private static readonly string[] scopes = { SheetsService.Scope.Spreadsheets };
+        private const string applicationName = "Flats Parser";
+        private readonly string spreadsheetId;// "1J1JAErjEF9Z6-qodsUHz4MST84EoVkF3BgaAotR6SHk"
+		private readonly ILog logger;
 
-        public override void Export(IEnumerable<Flat> flats)
+		public GoogleSheetExporter(string spreadsheetId)
+		{
+			this.spreadsheetId = spreadsheetId;
+			logger = LogManager.GetLogger(GetType());
+		}
+
+		public override void Export(IEnumerable<Flat> flats)
         {
             var service = CreateService();
             var latestSheetProperties = GetLatestSheetProperties(service);
@@ -35,11 +42,11 @@ namespace FlatsParser
             {
                 batchUpdateSpreadsheetRequest.Requests.Add(new Request { UpdateCells = request });
             }
-            var batchUpdateRequest = service.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest, SpreadsheetId);
+            var batchUpdateRequest = service.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest, spreadsheetId);
             batchUpdateRequest.Execute();
         }
 
-        private static SheetsService CreateService()
+        private SheetsService CreateService()
         {
             UserCredential credential;
 
@@ -52,23 +59,23 @@ namespace FlatsParser
 
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
+                    scopes,
                     "user",
                     CancellationToken.None,
                     new FileDataStore(credPath, true)).Result;
-                Console.WriteLine("Credential file saved to: " + credPath);
+				logger.Info("Credential file saved to: " + credPath);
             }
 
             return new SheetsService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
+                ApplicationName = applicationName,
             });
         }
 
-        private static SheetProperties GetLatestSheetProperties(SheetsService service)
+        private SheetProperties GetLatestSheetProperties(SheetsService service)
         {
-            var getRequest = service.Spreadsheets.Get(SpreadsheetId);
+            var getRequest = service.Spreadsheets.Get(spreadsheetId);
             var spreadsheet = getRequest.Execute();
             return spreadsheet.Sheets.FirstOrDefault()?.Properties;
         }

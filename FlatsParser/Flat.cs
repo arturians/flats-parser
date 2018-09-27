@@ -51,7 +51,7 @@ namespace FlatsParser
 
         public override string ToString()
         {
-            return $"Number {Number}; rooms {RoomsCount}; floor {Floor}; section {Section}; Id {Id}";
+            return $"Number {Number}; rooms {RoomsCount}; floor {Floor}; section {Section}; Id {Id}; BuildName {BuildName}";
         }
     }
 
@@ -70,9 +70,4 @@ namespace FlatsParser
         None = 2,
         Full = 3
     }
-
-    //public enum KitchenType
-    //{
-
-    //}
 }

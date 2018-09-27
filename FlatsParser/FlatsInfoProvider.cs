@@ -5,15 +5,16 @@ using System.Text;
 
 namespace FlatsParser
 {
+	[Obsolete]
     public class FlatsInfoProvider
     {
-        private const int FirstFlatId = 1449;
-        private const int LastFlatId = 1739;
-        private const int FlatsCount = LastFlatId - FirstFlatId;
+        private const int firstFlatId = 1449;
+        private const int lastFlatId = 1739;
+        private const int flatsCount = lastFlatId - firstFlatId;
 
         public Flat[] GetFlats()
         {
-            var flatIds = Enumerable.Range(FirstFlatId, FlatsCount);
+            var flatIds = Enumerable.Range(firstFlatId, flatsCount);
             var flats = flatIds.AsParallel().Select(id =>
             {
                 using (var client = new WebClient { Encoding = Encoding.UTF8 })
